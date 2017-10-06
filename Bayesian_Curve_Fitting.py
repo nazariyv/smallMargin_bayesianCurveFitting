@@ -1,10 +1,18 @@
 import numpy as np
 import unittest
 
-x_vec = np.array([1., 2., 3., 4.])
-x_vec = x_vec.reshape(x_vec.shape + (1,))
+x_vec = np.array([1., 2., 3., 4.]).reshape((4,)+(1,))
+target_vec = np.array([5.,4.,3.,2.]).reshape((4,)+(1,))
 
 def variance(alpha, beta, new_x, x_vec, D):
+    """
+    :param alpha: alpha 
+    :param beta: beta
+    :param new_x: new data point (x, not the target)
+    :param x_vec: vector of all data points already observed.
+    :param D: dimension.
+    :return: variance.
+    """
     assert isinstance(alpha, float), "Alpha has to be a float."
     assert isinstance(beta, float),  "Beta has to be a float."
     assert isinstance(new_x, float), "New_x has to be a float."
@@ -16,8 +24,9 @@ def variance(alpha, beta, new_x, x_vec, D):
 
 def phi(x, D):
     """
-    x - is the real valued constant.
-    D - is an integer dimension.
+    :param x: - is the real valued constant.
+    :param D: - is an integer dimension.
+    :return: phi(x).
     """
     assert isinstance(x, float), "x should be a float."
     assert isinstance(D, int), "Dimension D, should be an integer."
@@ -32,6 +41,16 @@ def phi(x, D):
     return returnVector
 
 def mean(alpha, beta, new_x, target_vec, x_vec, D):
+    """
+    Returns the mean.
+    :param alpha: alpha.
+    :param beta: beta.
+    :param new_x: new data point (x, not the target).
+    :param target_vec: vector of all the observed targets.
+    :param x_vec: vector of all of the data points observed,
+    :param D: the dimension.
+    :return: returns the mean.
+    """
     assert isinstance(alpha, float), "Alpha should be a float."
     assert isinstance(beta, float),  "Beta should be a float."
     assert isinstance(new_x, float), "new_x should be a float."
@@ -48,7 +67,14 @@ def mean(alpha, beta, new_x, target_vec, x_vec, D):
     return beta * ((phi(new_x, D).T.dot(S)).dot(sum_vec_x))[0][0]
 
 def matrix_S(alpha, beta, x_vec, D):
-
+    """
+    Returns matrix S, not its inverse!
+    :param alpha: alpha.
+    :param beta: beta.
+    :param x_vec: vector of the observed data points.
+    :param D: dimension.
+    :return: Matrix S. Not its inverse.
+    """
     assert isinstance(alpha, float), "Alpha is not a float."
     assert isinstance(beta, float),  "Beta is not a float."
     assert isinstance(D, int),       "Dimension is not an int."
@@ -60,6 +86,9 @@ def matrix_S(alpha, beta, x_vec, D):
     return np.linalg.inv(first_expr+beta*second_expr)
 
 class TestPredictiveDistribution(unittest.TestCase):
+    """
+    Tests.
+    """
 
     # ---------- Phi method testing -------------
     def test_phi_validArg(self):
@@ -149,7 +178,6 @@ class TestPredictiveDistribution(unittest.TestCase):
 
     # ----------------- Mean tests ------------------
     def test_means_validArgs(self):
-        target_vec = np.array([5.,4.,3.,2.]).reshape((4,)+(1,))
         # sum_vec_x should be [14,30,80,246].T
         new_x = 1.0
         # left matrix product should be [4.0,-4.3,1.5,-0.166667].T
@@ -157,4 +185,26 @@ class TestPredictiveDistribution(unittest.TestCase):
         mn = mean(0.,1.,new_x,target_vec,x_vec,3)
         self.assertAlmostEqual(5.0115800,mn,delta=0.1)
 
-    #TODO: invalid means tests
+    def test_means_invalidAlpha(self):
+        with self.assertRaises(AssertionError):
+            mean(0,1.,1.,target_vec,x_vec,3)
+
+    def test_means_invalidBeta(self):
+        with self.assertRaises(AssertionError):
+            mean(0.,1,1.,target_vec,x_vec,3)
+
+    def test_means_invalidNewx(self):
+        with self.assertRaises(AssertionError):
+            mean(0.,1.,1,target_vec,x_vec,3)
+
+    def test_means_invalidXvec(self):
+        with self.assertRaises(IndexError):
+            mean(0.,1.,1.,target_vec,np.array([1.,2.]),3)
+
+    def test_means_invalidTargetVec(self):
+        with self.assertRaises(IndexError):
+            mean(0.,1.,1.,np.array([1.,2.]),x_vec,3)
+
+    def test_means_invalidD(self):
+        with self.assertRaises(AssertionError):
+            mean(0.,1.,1.,target_vec,x_vec,3.5)
