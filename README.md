@@ -1,4 +1,5 @@
-# smallMargin_bayesianCurveFitting
+smallMargin_bayesianCurveFitting
+================================
 
 Use jupyter notebook for the steps on curve fitting.
 
